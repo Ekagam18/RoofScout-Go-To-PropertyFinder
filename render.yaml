@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: roofscout
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: NODE_ENV
+        value: production

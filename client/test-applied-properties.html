@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applied Properties Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Applied Properties Test Suite</h1>
+    
+    <div class="section">
+        <h2>Test Scenario Setup</h2>
+        <button onclick="clearAllData()">Clear All Data</button>
+        <button onclick="setupTestData()">Setup Test Data</button>
+        <button onclick="showAllData()">Show All Data</button>
+    </div>
+
+    <div class="section">
+        <h2>User Application Tests</h2>
+        <button onclick="simulateJohnDoeApplication()">John Doe Applies for Villa</button>
+        <button onclick="simulateJaneSmithApplication()">Jane Smith Applies for Flat</button>
+        <button onclick="simulateJohnDoeSecondApplication()">John Doe Applies for Flat</button>
+    </div>
+
+    <div class="section">
+        <h2>Dashboard View Tests</h2>
+        <button onclick="testJohnDoeDashboard()">Test John Doe Dashboard</button>
+        <button onclick="testJaneSmithDashboard()">Test Jane Smith Dashboard</button>
+        <button onclick="testUnknownUserDashboard()">Test Unknown User Dashboard</button>
+    </div>
+
+    <div class="section">
+        <h2>Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearAllData() {
+            const keysToRemove = [];
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('applied') || key.includes('tour') || key.includes('Properties')) {
+                    keysToRemove.push(key);
+                }
+            });
+            
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            log(`🗑️ Cleared ${keysToRemove.length} localStorage keys`, 'success');
+            showAllData();
+        }
+
+        function setupTestData() {
+            // Setup some sample properties
+            const sampleProperties = [
+                {
+                    id: "PROP-001",
+                    title: "Luxury Villa in Punjab",
+                    price: "7500000",
+                    location: "Mohali, Punjab",
+                    type: "Sell",
+                    owner_id: "PropertyOwner123"
+                },
+                {
+                    id: "PROP-002", 
+                    title: "Modern Flat in Chandigarh",
+                    price: "4500000",
+                    location: "Sector 17, Chandigarh",
+                    type: "Sell",
+                    owner_id: "PropertyOwner456"
+                }
+            ];
+            
+            localStorage.setItem('allProperties', JSON.stringify(sampleProperties));
+            log('✅ Sample properties created', 'success');
+            showAllData();
+        }
+
+        function simulateJohnDoeApplication() {
+            const userName = "John Doe";
+            const property = {
+                id: "PROP-001",
+                title: "Luxury Villa in Punjab",
+                priceText: "₹75,00,000",
+                location: "Mohali, Punjab"
+            };
+            
+            const userKey = `appliedProperties_${userName.replace(/\s+/g, '_')}`;
+            const existingApps = JSON.parse(localStorage.getItem(userKey) || "[]");
+            
+            // Check for duplicates
+            if (!existingApps.some(app => app.id === property.id)) {
+                const newApp = {
+                    ...property,
+                    applied_at: new Date().toISOString(),
+                    applicant_name: userName
+                };
+                
+                existingApps.push(newApp);
+                localStorage.setItem(userKey, JSON.stringify(existingApps));
+                
+                // Also save to allApplications
+                const allApps = JSON.parse(localStorage.getItem("allApplications") || "[]");
+                allApps.push({...newApp, user_key: userKey});
+                localStorage.setItem("allApplications", JSON.stringify(allApps));
+                
+                log(`✅ ${userName} applied for ${property.title}`, 'success');
+            } else {
+                log(`ℹ️ ${userName} already applied for this property`, 'info');
+            }
+            
+            showAllData();
+        }
+
+        function simulateJaneSmithApplication() {
+            const userName = "Jane Smith";
+            const property = {
+                id: "PROP-002",
+                title: "Modern Flat in Chandigarh",
+                priceText: "₹45,00,000", 
+                location: "Sector 17, Chandigarh"
+            };
+            
+            const userKey = `appliedProperties_${userName.replace(/\s+/g, '_')}`;
+            const existingApps = JSON.parse(localStorage.getItem(userKey) || "[]");
+            
+            if (!existingApps.some(app => app.id === property.id)) {
+                const newApp = {
+                    ...property,
+                    applied_at: new Date().toISOString(),
+                    applicant_name: userName
+                };
+                
+                existingApps.push(newApp);
+                localStorage.setItem(userKey, JSON.stringify(existingApps));
+                
+                const allApps = JSON.parse(localStorage.getItem("allApplications") || "[]");
+                allApps.push({...newApp, user_key: userKey});
+                localStorage.setItem("allApplications", JSON.stringify(allApps));
+                
+                log(`✅ ${userName} applied for ${property.title}`, 'success');
+            } else {
+                log(`ℹ️ ${userName} already applied for this property`, 'info');
+            }
+            
+            showAllData();
+        }
+
+        function simulateJohnDoeSecondApplication() {
+            const userName = "John Doe";
+            const property = {
+                id: "PROP-002",
+                title: "Modern Flat in Chandigarh",
+                priceText: "₹45,00,000",
+                location: "Sector 17, Chandigarh"
+            };
+            
+            const userKey = `appliedProperties_${userName.replace(/\s+/g, '_')}`;
+            const existingApps = JSON.parse(localStorage.getItem(userKey) || "[]");
+            
+            if (!existingApps.some(app => app.id === property.id)) {
+                const newApp = {
+                    ...property,
+                    applied_at: new Date().toISOString(),
+                    applicant_name: userName
+                };
+                
+                existingApps.push(newApp);
+                localStorage.setItem(userKey, JSON.stringify(existingApps));
+                
+                const allApps = JSON.parse(localStorage.getItem("allApplications") || "[]");
+                allApps.push({...newApp, user_key: userKey});
+                localStorage.setItem("allApplications", JSON.stringify(allApps));
+                
+                log(`✅ ${userName} applied for ${property.title} (2nd property)`, 'success');
+            } else {
+                log(`ℹ️ ${userName} already applied for this property`, 'info');
+            }
+            
+            showAllData();
+        }
+
+        // Simulate the UserDashboard logic
+        function getUserAppliedProperties(loggedUser) {
+            let appliedProperties = [];
+            
+            // Method 1: Try current logged user key
+            const currentUserKey = `appliedProperties_${loggedUser.replace(/\s+/g, '_')}`;
+            appliedProperties = JSON.parse(localStorage.getItem(currentUserKey) || "[]");
+            
+            // Method 2: If no properties found, look through all user-specific keys
+            if (appliedProperties.length === 0) {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('appliedProperties_')) {
+                        const userApps = JSON.parse(localStorage.getItem(key) || "[]");
+                        const userAppsForCurrentUser = userApps.filter(app => 
+                            app.applicant_name === loggedUser
+                        );
+                        appliedProperties = appliedProperties.concat(userAppsForCurrentUser);
+                    }
+                });
+            }
+            
+            // Method 3: Also check old global applied properties as fallback
+            if (appliedProperties.length === 0) {
+                const globalApplied = JSON.parse(localStorage.getItem('appliedProperties') || "[]");
+                appliedProperties = globalApplied;
+            }
+            
+            return appliedProperties;
+        }
+
+        function testJohnDoeDashboard() {
+            const userName = "John Doe";
+            const apps = getUserAppliedProperties(userName);
+            
+            log(`🔍 Testing ${userName}'s dashboard:`, 'info');
+            log(`   Found ${apps.length} applied properties:`, 'info');
+            
+            apps.forEach(app => {
+                log(`   • ${app.title} (${app.location}) - Applied: ${new Date(app.applied_at).toLocaleDateString()}`, 'info');
+            });
+            
+            if (apps.length === 0) {
+                log(`   ❌ No applications found for ${userName}`, 'error');
+            } else {
+                log(`   ✅ ${userName} can see their applications`, 'success');
+            }
+        }
+
+        function testJaneSmithDashboard() {
+            const userName = "Jane Smith";
+            const apps = getUserAppliedProperties(userName);
+            
+            log(`🔍 Testing ${userName}'s dashboard:`, 'info');
+            log(`   Found ${apps.length} applied properties:`, 'info');
+            
+            apps.forEach(app => {
+                log(`   • ${app.title} (${app.location}) - Applied: ${new Date(app.applied_at).toLocaleDateString()}`, 'info');
+            });
+            
+            if (apps.length === 0) {
+                log(`   ❌ No applications found for ${userName}`, 'error');
+            } else {
+                log(`   ✅ ${userName} can see their applications`, 'success');
+            }
+        }
+
+        function testUnknownUserDashboard() {
+            const userName = "Unknown User";
+            const apps = getUserAppliedProperties(userName);
+            
+            log(`🔍 Testing ${userName}'s dashboard:`, 'info');
+            log(`   Found ${apps.length} applied properties`, 'info');
+            
+            if (apps.length === 0) {
+                log(`   ✅ Correctly shows no applications for unknown user`, 'success');
+            } else {
+                log(`   ⚠️ Unknown user sees ${apps.length} applications (fallback behavior)`, 'info');
+            }
+        }
+
+        function showAllData() {
+            log('📊 Current localStorage data:', 'info');
+            
+            // Show user-specific keys
+            const userKeys = Object.keys(localStorage).filter(key => key.startsWith('appliedProperties_'));
+            log(`   User-specific keys: ${userKeys.length}`, 'info');
+            userKeys.forEach(key => {
+                const data = JSON.parse(localStorage.getItem(key) || "[]");
+                const userName = key.replace('appliedProperties_', '').replace(/_/g, ' ');
+                log(`   • ${userName}: ${data.length} applications`, 'info');
+            });
+            
+            // Show allApplications
+            const allApps = JSON.parse(localStorage.getItem("allApplications") || "[]");
+            log(`   All Applications: ${allApps.length}`, 'info');
+            
+            // Show properties
+            const allProps = JSON.parse(localStorage.getItem("allProperties") || "[]");
+            log(`   All Properties: ${allProps.length}`, 'info');
+        }
+
+        // Initialize
+        log('🚀 Applied Properties Test Suite Ready', 'success');
+        log('Click "Setup Test Data" to begin testing', 'info');
+    </script>
+</body>
+</html>
