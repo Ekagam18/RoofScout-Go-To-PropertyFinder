@@ -40,7 +40,7 @@ function AdmPropt() {
   useEffect(() => {
     const fetchPlots = async () => {
       try {
-        const { data } = await API.get("/properties");
+        const { data } = await API.get("/properties?includeSold=true");
         if (data.success) {
           // Filter only plots
           const plots = data.properties.filter(p => p.type === 'plot');

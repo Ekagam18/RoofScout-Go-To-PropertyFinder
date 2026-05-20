@@ -59,8 +59,17 @@ function PropertyCard({ property, onViewDetails, onSave, onDelete }) {
   // Handle image plural vs singular
   const displayImage = property.image || (property.images && property.images.length > 0 ? property.images[0] : null);
 
+  const isSold = property.status === "sold";
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden flex flex-col h-full">
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden flex flex-col h-full relative ${isSold ? 'opacity-90' : ''}`}>
+      {isSold && (
+        <div className="absolute top-4 right-4 z-10">
+          <span className="bg-red-600 text-white text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1">
+            <i className="ri-checkbox-circle-fill"></i> Sold
+          </span>
+        </div>
+      )}
       <div className="h-52 w-full overflow-hidden">
         <img src={displayImage} alt={property.title} className="w-full h-full object-cover" />
       </div>

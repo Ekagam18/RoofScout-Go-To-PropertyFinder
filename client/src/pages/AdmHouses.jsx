@@ -44,7 +44,7 @@ function AdmHouses() {
   useEffect(() => {
     const fetchHouses = async () => {
       try {
-        const { data } = await API.get("/properties");
+        const { data } = await API.get("/properties?includeSold=true");
         if (data.success) {
           console.log("All properties from DB:", data.properties);
           // Show all properties EXCEPT plots - this includes houses, flats, villas, rentals, etc.

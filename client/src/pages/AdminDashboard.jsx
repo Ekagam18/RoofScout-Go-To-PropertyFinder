@@ -49,12 +49,22 @@ function AdminDashboard() {
 
     const fetchProperties = async () => {
       try {
-        const { data } = await API.get("/properties");
+        const { data } = await API.get("/properties?includeSold=true");
         if (data.success) {
           setAllProperties(data.properties);
           const houses = data.properties.filter(p => p.type === 'house' || p.type === 'villa' || p.type === 'flat').length;
           const plots = data.properties.filter(p => p.type === 'plot').length;
           const rentals = data.properties.filter(p => p.type === 'rent' || p.type === 'Rent').length;
+          
+          // Calculate Sold vs Available for the pie chart
+          const soldCount = data.properties.filter(p => p.status === 'sold').length;
+          const availableCount = data.properties.length - soldCount;
+          
+          setHousesStatus([
+            { name: 'Available', value: availableCount },
+            { name: 'Sold', value: soldCount }
+          ]);
+          
           setStats(prev => ({ ...prev, houses, plots, rentals }));
         }
       } catch (err) {
