@@ -37,11 +37,26 @@ if (!JWT_SECRET) {
 
 // Connect to MongoDB
 if (MONGO_URI) {
-  mongoose.connect(MONGO_URI)
-    .then(() => console.log("✅ MongoDB Connected Successfully"))
+  console.log("⏳ Attempting to connect to MongoDB...");
+  mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
+    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  })
+    .then(() => {
+      console.log("✅ MongoDB Connected Successfully");
+      const host = mongoose.connection.host;
+      console.log(`📡 Connected to host: ${host}`);
+    })
     .catch(err => {
       console.error("❌ MongoDB Connection Error:", err.message);
-      console.error("Make sure your IP is whitelisted in MongoDB Atlas and the credentials are correct.");
+      if (err.message.includes("ETIMEOUT")) {
+        console.error("🔍 Potential Issue: Connection timed out. This usually means the server cannot reach MongoDB Atlas.");
+      } else if (err.message.includes("ECONNREFUSED")) {
+        console.error("🔍 Potential Issue: Connection refused. Check if the port and host in MONGO_URI are correct.");
+      } else if (err.message.includes("authentication failed")) {
+        console.error("🔍 Potential Issue: Authentication failed. Check your username and password in MONGO_URI.");
+      }
+      console.error("👉 Action Required: Please verify that you have whitelisted '0.0.0.0/0' (all IPs) in your MongoDB Atlas Network Access settings for deployment.");
     });
 }
 
