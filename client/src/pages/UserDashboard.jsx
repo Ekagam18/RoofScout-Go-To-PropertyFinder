@@ -1469,7 +1469,7 @@ function UserDashboard() {
                 // Update local state instead of reloading
                 setReceivedTourRequests(prevRequests => 
                     prevRequests.map(req =>
-                        req.id === requestId ? { ...req, status: mappedStatus } : req
+                        (req._id || req.id) === requestId ? { ...req, status: mappedStatus } : req
                     )
                 );
             } else {
@@ -1871,24 +1871,37 @@ function UserDashboard() {
                                             <p className="text-gray-700 dark:text-gray-200 font-semibold mt-2">
                                                 Price: ₹{property.price?.toLocaleString?.() || property.price}
                                             </p>
+
+                                            {property.status === "sold" && (
+                                                <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl">
+                                                    <p className="text-green-700 dark:text-green-400 font-bold text-sm flex items-center gap-2">
+                                                        <i className="ri-checkbox-circle-fill"></i>
+                                                        Sold to {property.buyerName || "a buyer"}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Edit/Delete Actions */}
                                         <div className="flex flex-col gap-2">
-                                            <button
-                                                onClick={() => handleEditClick(property)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
-                                            >
-                                                <i className="ri-edit-line"></i>
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleSoftDelete(propertyId)}
-                                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
-                                            >
-                                                <i className="ri-delete-bin-line"></i>
-                                                Delete
-                                            </button>
+                                            {property.status !== "sold" && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleEditClick(property)}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
+                                                    >
+                                                        <i className="ri-edit-line"></i>
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSoftDelete(propertyId)}
+                                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2"
+                                                    >
+                                                        <i className="ri-delete-bin-line"></i>
+                                                        Delete
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -2036,10 +2049,11 @@ function UserDashboard() {
                                                         <span className={`text-xs font-bold px-4 py-2 rounded-lg shadow-sm ${(application.status === 'Approved' || application.status === 'approved') ? 'bg-gradient-to-r from-green-400 to-green-500 text-white' :
                                                             (application.status === 'Paid' || application.status === 'paid') ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white' :
                                                                 (application.status === 'Rejected' || application.status === 'rejected') ? 'bg-gradient-to-r from-red-400 to-red-500 text-white' :
-                                                                    application.status === 'Viewed' ? 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white' :
-                                                                        'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
+                                                                    (application.status === 'Sold' || application.status === 'sold') ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white' :
+                                                                        application.status === 'Viewed' ? 'bg-gradient-to-r from-blue-400 to-indigo-500 text-white' :
+                                                                            'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
                                                             }`}>
-                                                            {application.status || 'Pending'}
+                                                            {application.status === 'Sold' ? 'Sold to another user' : (application.status || 'Pending')}
                                                         </span>
 
                                                         {/* Pay Now button for approved applications */}
@@ -2058,7 +2072,7 @@ function UserDashboard() {
                                                         {(application.status === 'Paid' || application.status === 'paid') && (
                                                             <div className="flex items-center gap-2 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-2 rounded-xl border border-cyan-200">
                                                                 <i className="ri-checkbox-circle-fill text-cyan-600 text-lg"></i>
-                                                                <span className="text-sm font-bold text-cyan-700">Payment Complete</span>
+                                                                <span className="text-sm font-bold text-cyan-700">House transfer will be done within 48 hrs</span>
                                                             </div>
                                                         )}
 

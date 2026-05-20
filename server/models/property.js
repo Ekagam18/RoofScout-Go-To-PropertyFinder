@@ -14,6 +14,9 @@ const propertySchema = new mongoose.Schema({
   baths: { type: Number },
   garages: { type: Number },
   ownerName: { type: String },    // store owner display name
+  status: { type: String, default: "available" }, // available, sold, pending
+  soldTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  buyerName: { type: String },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
 }, { timestamps: true });
 

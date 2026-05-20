@@ -29,7 +29,7 @@ const STATE_MAP = {
 router.get("/", async (req, res, next) => {
   try {
     const { state, type, minPrice, maxPrice } = req.query;
-    let filter = {};
+    let filter = { status: "available" }; // Default: only show available properties
 
     // Type filter
     if (type && type !== "all") filter.type = type;

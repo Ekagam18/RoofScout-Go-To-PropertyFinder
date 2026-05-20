@@ -49,17 +49,34 @@ router.post("/", authMiddleware, async (req, res, next) => {
 
     await newPayment.save();
 
-    // Proactively remove the property from listings upon successful payment
+    // Mark the property as sold instead of deleting it
     try {
-      await Property.findByIdAndDelete(propertyId);
-      console.log(`✅ Property ${propertyId} removed from listings after payment.`);
+      await Property.findByIdAndUpdate(propertyId, { 
+        status: "sold", 
+        soldTo: userId,
+        buyerName: buyerName
+      });
+      console.log(`✅ Property ${propertyId} marked as sold to ${buyerName}.`);
+
+      // Also update any pending requests/applications for this property by this user to 'Paid'
+      const Request = require("../models/request");
+      await Request.updateMany(
+        { propertyId: propertyId, userId: userId },
+        { status: "Paid" }
+      );
+
+      // Mark all OTHER pending requests for this property as 'Sold' (to someone else)
+      await Request.updateMany(
+        { propertyId: propertyId, userId: { $ne: userId }, status: { $ne: "Paid" } },
+        { status: "Sold" }
+      );
+      console.log(`✅ Requests for property ${propertyId} updated (Buyer: Paid, Others: Sold).`);
+
     } catch (propErr) {
-      console.error(`⚠️ Failed to remove property ${propertyId} after payment:`, propErr.message);
-      // We don't fail the whole request if property removal fails, 
-      // but the payment is already saved.
+      console.error(`⚠️ Failed to update property ${propertyId} after payment:`, propErr.message);
     }
 
-    res.status(201).json({ success: true, message: "Payment recorded successfully and listing removed", payment: newPayment });
+    res.status(201).json({ success: true, message: "Payment recorded successfully and property marked as sold", payment: newPayment });
   } catch (err) {
     next(err);
   }
