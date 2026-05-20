@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
       }
       return { success: false, message: "Invalid response from server" };
     } catch (err) {
-      const message = err.response?.data?.message || "Login failed";
+      const message = err.response?.data?.debugMessage || err.response?.data?.message || "Login failed";
       return { success: false, message };
     }
   }, []);
@@ -103,7 +103,7 @@ export function AuthProvider({ children }) {
       }
       return { success: false, message: "Invalid response from server" };
     } catch (err) {
-      const message = err.response?.data?.message || "Signup failed";
+      const message = err.response?.data?.debugMessage || err.response?.data?.message || "Signup failed";
       return { success: false, message };
     }
   }, []);

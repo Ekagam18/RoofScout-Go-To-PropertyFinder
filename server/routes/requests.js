@@ -6,7 +6,7 @@ const Request = require("../models/request");
  * POST /api/request
  * Public: Create a new request (inquiry or tour)
  */
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   try {
     const {
       propertyId,
@@ -42,8 +42,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({ success: true, message: "Request submitted successfully", request: newRequest });
   } catch (err) {
-    console.error("POST /api/request error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -51,13 +50,12 @@ router.post("/", async (req, res) => {
  * GET /api/request
  * Optional: Get all requests (for admin)
  */
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const requests = await Request.find().sort({ createdAt: -1 });
     res.json({ success: true, requests });
   } catch (err) {
-    console.error("GET /api/request error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -65,13 +63,12 @@ router.get("/", async (req, res) => {
  * GET /api/request/property/:propertyId
  * Get requests for a specific property
  */
-router.get("/property/:propertyId", async (req, res) => {
+router.get("/property/:propertyId", async (req, res, next) => {
   try {
     const requests = await Request.find({ propertyId: req.params.propertyId }).sort({ createdAt: -1 });
     res.json({ success: true, requests });
   } catch (err) {
-    console.error("GET /api/request/property error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -79,13 +76,12 @@ router.get("/property/:propertyId", async (req, res) => {
  * GET /api/request/user/:userId
  * Get requests for a specific user
  */
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", async (req, res, next) => {
   try {
     const requests = await Request.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     res.json({ success: true, requests });
   } catch (err) {
-    console.error("GET /api/request/user error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -93,7 +89,7 @@ router.get("/user/:userId", async (req, res) => {
  * PUT /api/request/:id/status
  * Update request status
  */
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", async (req, res, next) => {
   try {
     const { status } = req.body;
     const request = await Request.findByIdAndUpdate(
@@ -118,8 +114,7 @@ router.put("/:id/status", async (req, res) => {
     
     res.json({ success: true, message: "Status updated", request });
   } catch (err) {
-    console.error("PUT /api/request/:id/status error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -127,7 +122,7 @@ router.put("/:id/status", async (req, res) => {
  * DELETE /api/request/:id
  * Delete a request (application or tour)
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const request = await Request.findByIdAndDelete(req.params.id);
     
@@ -153,8 +148,7 @@ router.delete("/:id", async (req, res) => {
     
     res.json({ success: true, message: "Request deleted successfully", request });
   } catch (err) {
-    console.error("DELETE /api/request/:id error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -162,7 +156,7 @@ router.delete("/:id", async (req, res) => {
  * PUT /api/request/:id
  * Update a request (edit message, date, time)
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req, res, next) => {
   try {
     const { message, date, time, mobile } = req.body;
     
@@ -190,8 +184,7 @@ router.put("/:id", async (req, res) => {
     
     res.json({ success: true, message: "Request updated successfully", request });
   } catch (err) {
-    console.error("PUT /api/request/:id error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 

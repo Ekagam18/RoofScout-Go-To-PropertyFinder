@@ -26,7 +26,7 @@ const STATE_MAP = {
  *  - If state provided, checks both state and location fields.
  *  - If state provided and no results, try alias-based fallback using STATE_MAP.
  */
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const { state, type, minPrice, maxPrice } = req.query;
     let filter = {};
@@ -77,8 +77,7 @@ router.get("/", async (req, res) => {
 
     return res.json({ success: true, properties: mappedProperties });
   } catch (err) {
-    console.error("GET /properties error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -86,7 +85,7 @@ router.get("/", async (req, res) => {
  * GET /api/properties/user
  * Protected: list properties created by the logged-in user
  */
-router.get("/user", authMiddleware, async (req, res) => {
+router.get("/user", authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const properties = await Property.find({ user: userId }).sort({ createdAt: -1 });
@@ -102,8 +101,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     return res.json({ success: true, properties: mappedProperties });
   } catch (err) {
-    console.error("GET /properties/user error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -111,7 +109,7 @@ router.get("/user", authMiddleware, async (req, res) => {
  * GET /api/properties/:id/view
  * Public: view single property by id (JSON API)
  */
-router.get("/:id/view", async (req, res) => {
+router.get("/:id/view", async (req, res, next) => {
   try {
     const property = await Property.findById(req.params.id).populate("user", "name email");
     if (!property) {
@@ -123,8 +121,7 @@ router.get("/:id/view", async (req, res) => {
 
     return res.json({ success: true, property: mapped });
   } catch (err) {
-    console.error("GET /properties/:id/view error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -132,7 +129,7 @@ router.get("/:id/view", async (req, res) => {
  * GET /properties/:id/ssr
  * SSR: Server-Side Rendered property view using EJS
  */
-router.get("/:id/ssr", async (req, res) => {
+router.get("/:id/ssr", async (req, res, next) => {
   try {
     const property = await Property.findById(req.params.id).populate("user", "name email");
     if (!property) {
@@ -156,8 +153,7 @@ router.get("/:id/ssr", async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("GET /properties/:id/ssr error:", err);
-    return res.status(500).render("error", { message: "Server error" });
+    next(err);
   }
 });
 
@@ -168,7 +164,7 @@ router.get("/:id/ssr", async (req, res) => {
  *  title, description, price, location, state, district, type, area, beds, baths, garages, ownerName
  *  images (array of image files)
  */
-router.post("/add", authMiddleware, upload.array('images', 10), async (req, res) => {
+router.post("/add", authMiddleware, upload.array('images', 10), async (req, res, next) => {
   try {
     const {
       title,
@@ -224,8 +220,7 @@ router.post("/add", authMiddleware, upload.array('images', 10), async (req, res)
     
     return res.status(201).json({ success: true, property: newProperty });
   } catch (err) {
-    console.error("POST /properties/add error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -233,7 +228,7 @@ router.post("/add", authMiddleware, upload.array('images', 10), async (req, res)
  * PUT /api/properties/:id
  * Protected (Admin only): Edit a property
  */
-router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+router.put("/:id", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -260,8 +255,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 
     return res.json({ success: true, property });
   } catch (err) {
-    console.error("PUT /properties/:id error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -269,7 +263,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
  * DELETE /api/properties/:id
  * Protected (Admin only): Delete a property and its images from Cloudinary
  */
-router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -305,8 +299,7 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 
     return res.json({ success: true, message: "Property deleted successfully" });
   } catch (err) {
-    console.error("DELETE /properties/:id error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 

@@ -6,7 +6,7 @@ const { authMiddleware, adminMiddleware } = require("../middleware/authMiddlewar
 const router = express.Router();
 
 // Admin stats route
-router.get("/stats", authMiddleware, adminMiddleware, async (req, res) => {
+router.get("/stats", authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalProperties = await Property.countDocuments();
@@ -31,8 +31,7 @@ router.get("/stats", authMiddleware, adminMiddleware, async (req, res) => {
       housesStatus: []
     });
   } catch (err) {
-    console.error("Admin stats error:", err.message);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 

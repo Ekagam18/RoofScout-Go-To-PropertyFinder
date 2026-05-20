@@ -8,7 +8,7 @@ const User = require("../models/user");
  * POST /api/payments
  * Create a new payment record
  */
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   try {
     const {
       propertyId,
@@ -49,8 +49,7 @@ router.post("/", async (req, res) => {
     await newPayment.save();
     res.status(201).json({ success: true, message: "Payment recorded successfully", payment: newPayment });
   } catch (err) {
-    console.error("POST /api/payments error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -58,7 +57,7 @@ router.post("/", async (req, res) => {
  * GET /api/payments
  * Get all payments (for admin)
  */
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const payments = await Payment.find()
       .populate('propertyId', 'title price location state type image')
@@ -68,8 +67,7 @@ router.get("/", async (req, res) => {
     
     res.json({ success: true, payments });
   } catch (err) {
-    console.error("GET /api/payments error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -77,7 +75,7 @@ router.get("/", async (req, res) => {
  * GET /api/payments/user/:userId
  * Get payments for a specific user
  */
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", async (req, res, next) => {
   try {
     const payments = await Payment.find({ userId: req.params.userId })
       .populate('propertyId', 'title price location state type image')
@@ -85,8 +83,7 @@ router.get("/user/:userId", async (req, res) => {
     
     res.json({ success: true, payments });
   } catch (err) {
-    console.error("GET /api/payments/user error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
@@ -94,7 +91,7 @@ router.get("/user/:userId", async (req, res) => {
  * GET /api/payments/property/:propertyId
  * Get payments for a specific property
  */
-router.get("/property/:propertyId", async (req, res) => {
+router.get("/property/:propertyId", async (req, res, next) => {
   try {
     const payments = await Payment.find({ propertyId: req.params.propertyId })
       .populate('userId', 'name email')
@@ -102,8 +99,7 @@ router.get("/property/:propertyId", async (req, res) => {
     
     res.json({ success: true, payments });
   } catch (err) {
-    console.error("GET /api/payments/property error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 

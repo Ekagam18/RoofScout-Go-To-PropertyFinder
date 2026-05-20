@@ -25,11 +25,25 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Validate critical environment variables
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is not defined in environment variables!");
+}
+if (!JWT_SECRET) {
+  console.error("❌ ERROR: JWT_SECRET is not defined in environment variables!");
+}
 
 // Connect to MongoDB
-mongoose.connect(MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+if (MONGO_URI) {
+  mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected Successfully"))
+    .catch(err => {
+      console.error("❌ MongoDB Connection Error:", err.message);
+      console.error("Make sure your IP is whitelisted in MongoDB Atlas and the credentials are correct.");
+    });
+}
 
 // Middleware
 app.use(cors());
