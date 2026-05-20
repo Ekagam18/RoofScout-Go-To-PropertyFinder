@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { API_BASE_URL } from "../config";
 
 /**
  * ViewDetail.jsx
@@ -122,8 +123,7 @@ export default function ViewDetail() {
       if (!houseId) return;
 
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const res = await fetch(`${baseUrl}/api/properties/${houseId}/view`);
+        const res = await fetch(`${API_BASE_URL}/api/properties/${houseId}/view`);
         const data = await res.json();
 
         if (res.ok && data && data.success) {
@@ -198,8 +198,7 @@ export default function ViewDetail() {
     };
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      const response = await fetch(`${baseUrl}/api/request`, {
+      const response = await fetch(`${API_BASE_URL}/api/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestPayload)
@@ -248,8 +247,7 @@ export default function ViewDetail() {
     };
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      const response = await fetch(`${baseUrl}/api/request`, {
+      const response = await fetch(`${API_BASE_URL}/api/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestPayload)

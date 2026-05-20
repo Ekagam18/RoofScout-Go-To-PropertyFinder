@@ -1166,6 +1166,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import API, { getUserProperties, updateProperty, deleteProperty } from "../api";
 import { useTheme } from "../hooks/useTheme";
+import { API_BASE_URL } from "../config";
 
 // Define possible tabs for clarity
 const TABS = {
@@ -1320,8 +1321,7 @@ function UserDashboard() {
             setLoadingRequests(true);
             try {
                 const token = localStorage.getItem("token");
-                const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-                const response = await fetch(`${baseUrl}/api/request?t=${Date.now()}`, {
+                const response = await fetch(`${API_BASE_URL}/api/request?t=${Date.now()}`, {
                     headers: {
                         "Authorization": `Bearer ${token}`
                     }

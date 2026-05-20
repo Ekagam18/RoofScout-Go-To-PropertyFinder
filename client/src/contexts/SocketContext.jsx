@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
+import { SOCKET_URL } from "../config";
 
 const SocketContext = createContext(null);
 
@@ -20,8 +21,7 @@ export function SocketProvider({ children }) {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
     
-    const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    const newSocket = io(socketUrl, {
+    const newSocket = io(SOCKET_URL, {
       auth: { token, userId },
       transports: ["websocket"],
     });

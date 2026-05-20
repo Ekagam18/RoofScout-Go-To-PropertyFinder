@@ -1,11 +1,18 @@
+import { createClient } from "@supabase/supabase-js";
+import { API_BASE_URL } from "./config";
+
+// Supabase configuration
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 // ─── LOCAL AUTH — Backend Integration ───────────────────────────────────────
-// Users are authenticated against the Express backend running on localhost:5000
+// Users are authenticated against the Express backend
 // The current session (JWT token & user data) is securely stored in localStorage.
 
 const SESSION_KEY = "rs_session";
 const TOKEN_KEY = "rs_token";
 const AUTH_CALLBACKS = [];
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000") + "/api/auth";
+const API_BASE_URL_AUTH = `${API_BASE_URL}/api/auth`;
 
 function getSession() {
     try {
@@ -35,7 +42,7 @@ export const localAuth = {
             const finalUsername = username || email.split("@")[0];
             const finalName = name || finalUsername;
 
-            const response = await fetch(`${API_BASE_URL}/signup`, {
+            const response = await fetch(`${API_BASE_URL_AUTH}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, username: finalUsername, name: finalName })
@@ -70,7 +77,7 @@ export const localAuth = {
             // we will send the email as the username to the backend.
             const username = email;
 
-            const response = await fetch(`${API_BASE_URL}/login`, {
+            const response = await fetch(`${API_BASE_URL_AUTH}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })

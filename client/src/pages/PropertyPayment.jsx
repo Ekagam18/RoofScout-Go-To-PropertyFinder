@@ -6,6 +6,7 @@ import { CreditCard, Wallet, Home, CheckCircle, ShieldCheck } from 'lucide-react
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import API from '../utils/axiosConfig';
+import { API_BASE_URL } from "../config";
 
 function PropertyPayment() {
     const [theme] = useTheme();
@@ -138,8 +139,7 @@ function PropertyPayment() {
             }
 
             // Remove from backend database so it stops showing up in listings
-            const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-            const deleteResponse = await fetch(`${baseUrl}/api/property/${propertyData.houseId}`, {
+            const deleteResponse = await fetch(`${API_BASE_URL}/api/properties/${propertyData.houseId}`, {
                 method: 'DELETE',
             });
             const deleteResult = await deleteResponse.json();
