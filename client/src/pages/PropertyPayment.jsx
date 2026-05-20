@@ -134,24 +134,14 @@ function PropertyPayment() {
 
             const paymentResponse = await API.post('/payments', paymentData);
             
-            if (!paymentResponse.data.success) {
-                throw new Error('Failed to save payment record');
-            }
-
-            // Remove from backend database so it stops showing up in listings
-            const deleteResponse = await fetch(`${API_BASE_URL}/api/properties/${propertyData.houseId}`, {
-                method: 'DELETE',
-            });
-            const deleteResult = await deleteResponse.json();
-
-            if (deleteResponse.ok && deleteResult.success) {
+            if (paymentResponse.data.success) {
                 setTimeout(() => {
                     alert(`Payment Successful! You have requested to ${isRent ? 'rent' : 'buy'} ${propertyData.title}. The owner will contact you shortly to finalize paperwork.`);
                     setIsProcessing(false);
                     navigate('/userdashboard');
                 }, 1500); // Small delay for UX
             } else {
-                alert(`Payment processed, but failed to remove listing: ${deleteResult.message || 'Unknown error'}`);
+                alert(`Payment failed: ${paymentResponse.data.message || 'Unknown error'}`);
                 setIsProcessing(false);
             }
         } catch (error) {

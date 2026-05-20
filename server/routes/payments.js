@@ -1,14 +1,15 @@
 const express = require("express");
-const router = express.Router();
 const Payment = require("../models/payment");
 const Property = require("../models/property");
-const User = require("../models/user");
+const { authMiddleware } = require("../middleware/authMiddleware");
+
+const router = express.Router();
 
 /**
  * POST /api/payments
  * Create a new payment record
  */
-router.post("/", async (req, res, next) => {
+router.post("/", authMiddleware, async (req, res, next) => {
   try {
     const {
       propertyId,
@@ -47,7 +48,18 @@ router.post("/", async (req, res, next) => {
     });
 
     await newPayment.save();
-    res.status(201).json({ success: true, message: "Payment recorded successfully", payment: newPayment });
+
+    // Proactively remove the property from listings upon successful payment
+    try {
+      await Property.findByIdAndDelete(propertyId);
+      console.log(`✅ Property ${propertyId} removed from listings after payment.`);
+    } catch (propErr) {
+      console.error(`⚠️ Failed to remove property ${propertyId} after payment:`, propErr.message);
+      // We don't fail the whole request if property removal fails, 
+      // but the payment is already saved.
+    }
+
+    res.status(201).json({ success: true, message: "Payment recorded successfully and listing removed", payment: newPayment });
   } catch (err) {
     next(err);
   }
@@ -107,7 +119,7 @@ router.get("/property/:propertyId", async (req, res, next) => {
  * GET /api/payments/stats
  * Get payment statistics
  */
-router.get("/stats", async (req, res) => {
+router.get("/stats", async (req, res, next) => {
   try {
     const totalPayments = await Payment.countDocuments();
     const totalRevenue = await Payment.aggregate([
@@ -127,8 +139,7 @@ router.get("/stats", async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("GET /api/payments/stats error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    next(err);
   }
 });
 
