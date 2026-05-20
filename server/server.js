@@ -51,11 +51,30 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 
 // Serve Static Files (Production)
-app.use(express.static(path.join(__dirname, "../client/dist")));
+const clientDistPath = path.join(__dirname, "../client/dist");
+console.log("Checking for client dist at:", clientDistPath);
+if (require("fs").existsSync(clientDistPath)) {
+  console.log("✅ Client dist found");
+} else {
+  console.warn("⚠️ Warning: Client dist NOT found at", clientDistPath);
+}
+
+app.use(express.static(clientDistPath));
 
 // SPA Catch-all
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+  const indexPath = path.join(clientDistPath, "index.html");
+  if (require("fs").existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ 
+      success: false, 
+      message: `index.html not found at ${indexPath}`,
+      currentDir: __dirname,
+      parentDir: path.join(__dirname, ".."),
+      clientDistPath
+    });
+  }
 });
 
 // Error Handler
