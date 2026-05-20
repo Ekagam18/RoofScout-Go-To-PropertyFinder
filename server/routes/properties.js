@@ -28,12 +28,9 @@ const STATE_MAP = {
  */
 router.get("/", async (req, res, next) => {
   try {
-    const { state, type, minPrice, maxPrice, includeSold } = req.query;
-    // Default: Show properties that are NOT sold
+    const { state, type, minPrice, maxPrice } = req.query;
+    // Show all properties (available and sold)
     let filter = {};
-    if (includeSold !== "true") {
-      filter.status = { $ne: "sold" };
-    }
 
     // Type filter
     if (type && type !== "all") filter.type = type;

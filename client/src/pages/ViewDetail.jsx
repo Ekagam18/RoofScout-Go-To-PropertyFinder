@@ -46,7 +46,9 @@ export default function ViewDetail() {
     houseId: "",
     owner: "Unknown",
     ownerEmail: "",
-    userId: ""
+    userId: "",
+    status: "available",
+    buyerName: ""
   });
 
   const [ownerStats, setOwnerStats] = useState({ totalProperties: 0, localities: [], address: "" });
@@ -145,7 +147,9 @@ export default function ViewDetail() {
             images: prop.images || (prop.image ? [prop.image] : prev.images),
             owner: prop.user?.name || prop.ownerName || prev.owner,
             ownerEmail: prop.user?.email || prop.ownerEmail || prev.ownerEmail,
-            userId: prop.user?._id || prop.user || prop.userId || prev.userId
+            userId: prop.user?._id || prop.user || prop.userId || prev.userId,
+            status: prop.status || "available",
+            buyerName: prop.buyerName || ""
           }));
         } else {
           console.warn("Property fetch returned no data or success=false:", data);
@@ -339,9 +343,15 @@ export default function ViewDetail() {
                   <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-600/90 text-white backdrop-blur shadow-sm border border-blue-500/50">
                     For {propertyStatus}
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-white/20 text-white backdrop-blur shadow-sm border border-white/30 truncate max-w-[150px]">
-                    {propertyData.type || "Property"}
-                  </span>
+                  {propertyData.status === "sold" ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-600 text-white backdrop-blur shadow-lg border border-red-500 flex items-center gap-1 animate-pulse">
+                      <i className="ri-checkbox-circle-fill"></i> SOLD
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-white/20 text-white backdrop-blur shadow-sm border border-white/30 truncate max-w-[150px]">
+                      {propertyData.type || "Property"}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-2">{propertyData.title || "Untitled Property"}</h1>
                 <p className="text-gray-200 text-sm md:text-base flex items-center gap-2 drop-shadow">
@@ -440,42 +450,54 @@ export default function ViewDetail() {
                 </div>
 
                 <div className="mb-8">
-                  <button
-                    onClick={() => {
-                      if (!isUserLoggedIn()) {
-                        alert("Please login first to proceed with the transaction.");
-                        navigate("/login");
-                        return;
-                      }
+                  {propertyData.status === "sold" ? (
+                    <div className="w-full bg-gray-100 dark:bg-gray-800 p-6 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 text-center">
+                      <i className="ri-error-warning-line text-4xl text-gray-400 mb-2 block"></i>
+                      <p className="text-gray-900 dark:text-white font-bold text-lg">Listing No Longer Available</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                        This property has been sold to {propertyData.buyerName || "another user"}.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          if (!isUserLoggedIn()) {
+                            alert("Please login first to proceed with the transaction.");
+                            navigate("/login");
+                            return;
+                          }
 
-                      const currentUserId = localStorage.getItem("userId");
-                      const storedUser = getStoredJSON("user", null);
-                      const currentEmail = storedUser?.email || "";
+                          const currentUserId = localStorage.getItem("userId");
+                          const storedUser = getStoredJSON("user", null);
+                          const currentEmail = storedUser?.email || "";
 
-                      // Only check ownership if we have the property's owner data from the backend
-                      if (!propertyData.userId && !propertyData.ownerEmail) {
-                         // Data might still be loading or fetch failed
-                         console.warn("Owner data not yet loaded, skipping strict check");
-                      } else {
-                        // Strict ownership check
-                        const isOwner =
-                          (propertyData.userId && currentUserId && String(propertyData.userId) === String(currentUserId)) ||
-                          (propertyData.ownerEmail && currentEmail && String(propertyData.ownerEmail).toLowerCase() === String(currentEmail).toLowerCase());
+                          // Only check ownership if we have the property's owner data from the backend
+                          if (!propertyData.userId && !propertyData.ownerEmail) {
+                             // Data might still be loading or fetch failed
+                             console.warn("Owner data not yet loaded, skipping strict check");
+                          } else {
+                            // Strict ownership check
+                            const isOwner =
+                              (propertyData.userId && currentUserId && String(propertyData.userId) === String(currentUserId)) ||
+                              (propertyData.ownerEmail && currentEmail && String(propertyData.ownerEmail).toLowerCase() === String(currentEmail).toLowerCase());
 
-                        if (isOwner) {
-                          alert("Hold on! You are the owner of this property. You cannot buy or rent your own listing.");
-                          return;
-                        }
-                      }
+                            if (isOwner) {
+                              alert("Hold on! You are the owner of this property. You cannot buy or rent your own listing.");
+                              return;
+                            }
+                          }
 
-                      navigate(`/property-payment/${propertyData.houseId}`, { state: { propertyData } });
-                    }}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <i className="ri-secure-payment-line text-2xl"></i>
-                    {propertyStatus === "Rent" ? "Rent Now" : "Buy Now"}
-                  </button>
-                  <p className="text-center text-xs text-gray-400 mt-2 font-medium">Secure Checkout • EMI Available</p>
+                          navigate(`/property-payment/${propertyData.houseId}`, { state: { propertyData } });
+                        }}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <i className="ri-secure-payment-line text-2xl"></i>
+                        {propertyStatus === "Rent" ? "Rent Now" : "Buy Now"}
+                      </button>
+                      <p className="text-center text-xs text-gray-400 mt-2 font-medium">Secure Checkout • EMI Available</p>
+                    </>
+                  )}
                 </div>
 
                 <div className="relative flex items-center py-2 mb-6">
